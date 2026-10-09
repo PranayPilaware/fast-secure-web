@@ -13,7 +13,7 @@ jobs:
         run: docker build --pull -t fast-secure-web:test .
       - name: Verify website and security headers
         run: |
-          docker run --detach --name portfolio-web --read-only --cap-drop=ALL --security-opt no-new-privileges -p 8080:8080 fast-secure-web:test
+          docker run --detach --name portfolio-web --read-only --tmpfs /tmp:rw,uid=101,gid=101 --tmpfs /var/cache/nginx:rw,uid=101,gid=101 --cap-drop=ALL --security-opt no-new-privileges -p 8080:8080 fast-secure-web:test
           trap 'docker logs portfolio-web; docker rm -f portfolio-web' EXIT
           for i in $(seq 1 15); do
             if curl --fail --silent http://127.0.0.1:8080/ | grep -q 'Fast by Design'; then break; fi
